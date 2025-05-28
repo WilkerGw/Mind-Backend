@@ -50,7 +50,6 @@ const saleSchema = new mongoose.Schema({
   ],
   saleDate: {
     type: String, // Tipo do campo é String
-    default: () => new Date().toISOString().split('T')[0], // Valor padrão é a data atual no formato YYYY-MM-DD
     validate: {
       validator: function(v) {
         return /^\d{4}-\d{2}-\d{2}$/.test(v); // Valida se o valor está no formato YYYY-MM-DD

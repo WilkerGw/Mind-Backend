@@ -30,19 +30,16 @@ exports.getSaleById = async (req, res) => {
 // Criar nova venda
 exports.createSale = async (req, res) => {
   try {
-    const { client, products, seller, paymentMethod, total } = req.body; // Extrai os dados do corpo da requisição
-
+    const { client, products, seller, paymentMethod, total, saleDate } = req.body; // Extrai os dados do corpo da requisição
     // Validação de campos obrigatórios
     if (!client || !products || !seller || !paymentMethod || total == null) {
       return res.status(400).json({ error: 'Campos obrigatórios não preenchidos.' }); // Retorna uma mensagem de erro com status 400 se algum campo obrigatório estiver faltando
     }
-
     // Verifica se o cliente existe
     const validClient = await Client.findById(client); // Busca o cliente pelo ID fornecido
     if (!validClient) {
       return res.status(400).json({ error: 'Cliente não encontrado.' }); // Retorna uma mensagem de erro com status 400 se o cliente não for encontrado
     }
-
     // Verifica se todos os produtos existem
     const invalidProduct = await Promise.any(
       products.map(async (p) => !(await Product.findById(p.product))) // Verifica se cada produto existe no banco de dados
@@ -50,12 +47,10 @@ exports.createSale = async (req, res) => {
     if (invalidProduct) {
       return res.status(400).json({ error: 'Um ou mais produtos inválidos.' }); // Retorna uma mensagem de erro com status 400 se algum produto for inválido
     }
-
     // Validação de total não negativo
     if (total < 0) {
       return res.status(400).json({ error: 'Total não pode ser negativo.' }); // Retorna uma mensagem de erro com status 400 se o total for negativo
     }
-
     // Prepara os dados da venda
     const saleData = {
       client,
@@ -65,9 +60,9 @@ exports.createSale = async (req, res) => {
       })),
       seller,
       paymentMethod,
-      total
+      total,
+      saleDate: saleDate || new Date().toISOString().split('T')[0] // Usa a data fornecida ou a data atual
     };
-
     const sale = new Sale(saleData); // Cria um novo documento Sale com os dados preparados
     await sale.save(); // Salva o novo documento no banco de dados
     res.status(201).json(sale); // Retorna a venda salva com status 201
