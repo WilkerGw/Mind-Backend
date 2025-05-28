@@ -138,3 +138,22 @@ exports.deleteClient = async (req, res) => {
     res.status(500).json({ error: 'Erro interno ao excluir cliente.' });
   }
 };
+
+exports.getClientsWithBirthdayThisMonth = async (req, res) => {
+  try {
+    const currentMonth = new Date().getMonth() + 1; // getMonth() retorna de 0 a 11
+    const clients = await Client.find({
+      $expr: {
+        $eq: [
+          { $month: "$birthDate" }, // Extrai o mês do campo birthDate
+          currentMonth
+        ]
+      }
+    }).select("fullName birthDate"); // Seleciona apenas campos relevantes
+
+    res.json(clients);
+  } catch (error) {
+    console.error('Erro ao buscar clientes com aniversário no mês:', error);
+    res.status(500).json({ error: 'Erro interno ao buscar clientes.' });
+  }
+};
