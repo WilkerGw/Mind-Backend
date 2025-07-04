@@ -1,159 +1,107 @@
+const asyncHandler = require('express-async-handler');
 const Client = require('../models/Client');
 
-// Listar todos os clientes ordenados por nome completo
-exports.getAllClients = async (req, res) => {
-  try {
-    const clients = await Client.find().sort({ fullName: 1 });
-    res.json(clients);
-  } catch (error) {
-    console.error("Erro ao buscar clientes:", error);
-    res.status(500).json({ error: 'Erro interno ao buscar clientes.' });
-  }
-};
+// @desc    Listar todos os clientes
+// @route   GET /api/clients
+exports.getAllClients = asyncHandler(async (req, res) => {
+  const clients = await Client.find().sort({ fullName: 1 });
+  res.json(clients);
+});
 
-// Buscar cliente por ID
-exports.getClientById = async (req, res) => {
-  try {
-    const client = await Client.findById(req.params.id);
-    if (!client) return res.status(404).json({ error: 'Cliente não encontrado' });
-    res.json(client);
-  } catch (error) {
-    if (error.kind === 'ObjectId') {
-        return res.status(400).json({ error: 'ID do cliente inválido' });
-    }
-    console.error("Erro ao buscar cliente por ID:", error);
-    res.status(500).json({ error: 'Erro interno ao buscar cliente.' });
+// @desc    Buscar cliente por ID
+// @route   GET /api/clients/:id
+exports.getClientById = asyncHandler(async (req, res) => {
+  const client = await Client.findById(req.params.id);
+  if (!client) {
+    res.status(404);
+    throw new Error('Cliente não encontrado');
   }
-};
+  res.json(client);
+});
 
-// Criar novo cliente
-exports.createClient = async (req, res) => {
-  const {
-    fullName,
-    cpf,
-    phone,
-    birthDate,
-    gender,
-    address,
-    cep,
-    receiptImage,
-    notes,
-    possuiReceita,
-    longe,
-    perto,
-    vencimentoReceita
-  } = req.body;
+// @desc    Criar novo cliente
+// @route   POST /api/clients
+exports.createClient = asyncHandler(async (req, res) => {
+  const { fullName, cpf, possuiReceita, longe, perto, vencimentoReceita } = req.body;
 
   if (!fullName || !cpf) {
-    return res.status(400).json({ error: 'Nome completo e CPF são obrigatórios.' });
+    res.status(400);
+    throw new Error('Nome completo e CPF são obrigatórios.');
   }
 
-  if (possuiReceita === true) {
-    if (!longe || !perto || !vencimentoReceita) {
-      return res.status(400).json({ error: 'Se "Possui Receita" está marcado, todas as informações de LONGE, PERTO e o vencimento são obrigatórios.' });
-    }
+  if (possuiReceita === true && (!longe || !perto || !vencimentoReceita)) {
+    res.status(400);
+    throw new Error('Se "Possui Receita" está marcado, as informações de receita são obrigatórias.');
   }
 
-  try {
-    const existingClient = await Client.findOne({ cpf });
-    if (existingClient) {
-      return res.status(409).json({ error: 'CPF já cadastrado.' });
-    }
-
-    const clientData = {
-      fullName, cpf, phone, birthDate, gender, address, cep, receiptImage, notes, possuiReceita
-    };
-
-    if (possuiReceita === true) {
-      clientData.longe = longe;
-      clientData.perto = perto;
-      clientData.vencimentoReceita = vencimentoReceita;
-    } else {
-      clientData.longe = null;
-      clientData.perto = null;
-      clientData.vencimentoReceita = null;
-    }
-
-    const client = new Client(clientData);
-    await client.save();
-    res.status(201).json(client);
-  } catch (error) {
-    console.error("Erro ao criar cliente:", error);
-    if (error.name === 'ValidationError') {
-      return res.status(400).json({ error: error.message });
-    }
-    res.status(500).json({ error: 'Erro interno ao criar cliente.' });
+  const existingClient = await Client.findOne({ cpf });
+  if (existingClient) {
+    res.status(409); // Conflict
+    throw new Error('CPF já cadastrado.');
   }
-};
+  
+  const clientData = req.body;
+  if (possuiReceita === false) {
+    clientData.longe = undefined;
+    clientData.perto = undefined;
+    clientData.vencimentoReceita = undefined;
+  }
 
-// Atualizar cliente
-exports.updateClient = async (req, res) => {
+  const client = await Client.create(clientData);
+  res.status(201).json(client);
+});
+
+// @desc    Atualizar cliente
+// @route   PUT /api/clients/:id
+exports.updateClient = asyncHandler(async (req, res) => {
   const { id } = req.params;
   const updateData = req.body;
 
-  if (updateData.possuiReceita === true) {
-    if (!updateData.longe || !updateData.perto || !updateData.vencimentoReceita) {
-      return res.status(400).json({ error: 'Se "Possui Receita" está marcado, todas as informações de LONGE, PERTO e o vencimento são obrigatórios.' });
+  const client = await Client.findById(id);
+  if (!client) {
+    res.status(404);
+    throw new Error('Cliente não encontrado');
+  }
+
+  if (updateData.cpf) {
+    const existingClient = await Client.findOne({ cpf: updateData.cpf, _id: { $ne: id } });
+    if (existingClient) {
+      res.status(409);
+      throw new Error('CPF já pertence a outro cliente.');
     }
-  } else if (updateData.hasOwnProperty('possuiReceita') && updateData.possuiReceita === false) {
+  }
+
+  if (updateData.hasOwnProperty('possuiReceita') && updateData.possuiReceita === false) {
     updateData.longe = null;
     updateData.perto = null;
     updateData.vencimentoReceita = null;
   }
 
-  try {
-    if (updateData.cpf) {
-        const existingClient = await Client.findOne({ cpf: updateData.cpf, _id: { $ne: id } });
-        if (existingClient) {
-            return res.status(409).json({ error: 'CPF já pertence a outro cliente.' });
-        }
-    }
+  const updatedClient = await Client.findByIdAndUpdate(id, updateData, { new: true, runValidators: true });
+  res.json(updatedClient);
+});
 
-    const client = await Client.findByIdAndUpdate(id, updateData, { new: true, runValidators: true });
-    if (!client) return res.status(404).json({ error: 'Cliente não encontrado' });
-    res.json(client);
-  } catch (error) {
-    console.error("Erro ao atualizar cliente:", error);
-    if (error.kind === 'ObjectId') {
-        return res.status(400).json({ error: 'ID do cliente inválido' });
-    }
-    if (error.name === 'ValidationError') {
-      return res.status(400).json({ error: error.message });
-    }
-    res.status(500).json({ error: 'Erro interno ao atualizar cliente.' });
+// @desc    Excluir cliente
+// @route   DELETE /api/clients/:id
+exports.deleteClient = asyncHandler(async (req, res) => {
+  const client = await Client.findById(req.params.id);
+  if (!client) {
+    res.status(404);
+    throw new Error('Cliente não encontrado');
   }
-};
+  await client.deleteOne();
+  res.status(200).json({ message: 'Cliente excluído com sucesso.' });
+});
 
-// Excluir cliente
-exports.deleteClient = async (req, res) => {
-  try {
-    const client = await Client.findByIdAndDelete(req.params.id);
-    if (!client) return res.status(404).json({ error: 'Cliente não encontrado' });
-    res.status(200).json({ message: 'Cliente excluído com sucesso.' });
-  } catch (error) {
-     if (error.kind === 'ObjectId') {
-        return res.status(400).json({ error: 'ID do cliente inválido' });
+// @desc    Obter aniversariantes do mês
+// @route   GET /api/clients/birthday/monthly
+exports.getClientsWithBirthdayThisMonth = asyncHandler(async (req, res) => {
+  const currentMonth = new Date().getMonth() + 1;
+  const clients = await Client.find({
+    $expr: {
+      $eq: [{ $month: "$birthDate" }, currentMonth]
     }
-    console.error("Erro ao deletar cliente:", error);
-    res.status(500).json({ error: 'Erro interno ao excluir cliente.' });
-  }
-};
+  }).select("fullName birthDate phone");
 
-exports.getClientsWithBirthdayThisMonth = async (req, res) => {
-  try {
-    const currentMonth = new Date().getMonth() + 1; // getMonth() retorna de 0 a 11
-    const clients = await Client.find({
-      $expr: {
-        $eq: [
-          { $month: "$birthDate" }, // Extrai o mês do campo birthDate
-          currentMonth
-        ]
-      }
-    }).select("fullName birthDate"); // Seleciona apenas campos relevantes
-
-    res.json(clients);
-  } catch (error) {
-    console.error('Erro ao buscar clientes com aniversário no mês:', error);
-    res.status(500).json({ error: 'Erro interno ao buscar clientes.' });
-  }
-};
+  res.json(clients);
+});

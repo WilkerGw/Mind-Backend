@@ -1,64 +1,51 @@
-const Product = require('../models/Product'); // Importa o modelo Product
+const asyncHandler = require('express-async-handler');
+const Product = require('../models/Product');
 
-// Listar todos os produtos
-exports.getAllProducts = async (req, res) => {
-  try {
-    const products = await Product.find(); // Busca todos os documentos na coleção Product
-    res.json(products); // Retorna a lista de produtos
-  } catch (error) {
-    console.error('Erro ao obter produtos:', error); // Registra o erro no console
-    res.status(500).json({ error: error.message }); // Retorna uma mensagem de erro com status 500
-  }
-};
+// @desc    Listar todos os produtos
+// @route   GET /api/products
+exports.getAllProducts = asyncHandler(async (req, res) => {
+  const products = await Product.find();
+  res.json(products);
+});
 
-// Buscar produto por ID
-exports.getProductById = async (req, res) => {
-  try {
-    const product = await Product.findById(req.params.id); // Busca um documento na coleção Product pelo ID fornecido nos parâmetros da requisição
-    if (!product) return res.status(404).json({ error: 'Produto não encontrado' }); // Se o produto não for encontrado, retorna uma mensagem de erro com status 404
-    res.json(product); // Retorna o produto encontrado
-  } catch (error) {
-    console.error('Erro ao obter produto por ID:', error); // Registra o erro no console
-    res.status(500).json({ error: error.message }); // Retorna uma mensagem de erro com status 500
+// @desc    Buscar produto por ID
+// @route   GET /api/products/:id
+exports.getProductById = asyncHandler(async (req, res) => {
+  const product = await Product.findById(req.params.id);
+  if (!product) {
+    res.status(404);
+    throw new Error('Produto não encontrado');
   }
-};
+  res.json(product);
+});
 
-// Criar novo produto
-exports.createProduct = async (req, res) => {
-  try {
-    const product = new Product(req.body); // Cria um novo documento Product com os dados extraídos do corpo da requisição
-    await product.save(); // Salva o novo documento no banco de dados
-    res.status(201).json(product); // Retorna o produto salvo com status 201
-  } catch (error) {
-    console.error('Erro ao criar produto:', error); // Registra o erro no console
-    res.status(400).json({ error: error.message }); // Retorna uma mensagem de erro com status 400
-  }
-};
+// @desc    Criar novo produto
+// @route   POST /api/products
+exports.createProduct = asyncHandler(async (req, res) => {
+  const product = await Product.create(req.body);
+  res.status(201).json(product);
+});
 
-// Atualizar produto
-exports.updateProduct = async (req, res) => {
-  try {
-    const product = await Product.findByIdAndUpdate(
-      req.params.id, // ID do produto a ser atualizado
-      req.body, // Novos dados para o produto
-      { new: true } // Retorna o documento atualizado
-    );
-    if (!product) return res.status(404).json({ error: 'Produto não encontrado' }); // Se o produto não for encontrado, retorna uma mensagem de erro com status 404
-    res.json(product); // Retorna o produto atualizado
-  } catch (error) {
-    console.error('Erro ao atualizar produto:', error); // Registra o erro no console
-    res.status(400).json({ error: error.message }); // Retorna uma mensagem de erro com status 400
+// @desc    Atualizar produto
+// @route   PUT /api/products/:id
+exports.updateProduct = asyncHandler(async (req, res) => {
+  const product = await Product.findById(req.params.id);
+  if (!product) {
+    res.status(404);
+    throw new Error('Produto não encontrado');
   }
-};
+  const updatedProduct = await Product.findByIdAndUpdate(req.params.id, req.body, { new: true, runValidators: true });
+  res.json(updatedProduct);
+});
 
-// Excluir produto
-exports.deleteProduct = async (req, res) => {
-  try {
-    const product = await Product.findByIdAndDelete(req.params.id); // Busca e deleta o documento pelo ID
-    if (!product) return res.status(404).json({ error: 'Produto não encontrado' }); // Se o produto não for encontrado, retorna uma mensagem de erro com status 404
-    res.status(204).send(); // Retorna status 204 indicando que o produto foi excluído sem conteúdo
-  } catch (error) {
-    console.error('Erro ao deletar produto:', error); // Registra o erro no console
-    res.status(500).json({ error: error.message }); // Retorna uma mensagem de erro com status 500
+// @desc    Excluir produto
+// @route   DELETE /api/products/:id
+exports.deleteProduct = asyncHandler(async (req, res) => {
+  const product = await Product.findById(req.params.id);
+  if (!product) {
+    res.status(404);
+    throw new Error('Produto não encontrado');
   }
-};
+  await product.deleteOne();
+  res.status(200).json({ message: "Produto excluído com sucesso." });
+});
