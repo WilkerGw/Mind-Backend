@@ -10,6 +10,7 @@ const salesRoutes = require("./routes/sales");
 const promotionRoutes = require("./routes/promotions");
 const boletoRoutes = require("./routes/boletos");
 const agendamentoRoutes = require("./routes/agendamento");
+const authRoutes = require("./routes/auth"); 
 
 const app = express();
 
@@ -18,6 +19,7 @@ connectDB();
 app.use(cors());
 app.use(express.json());
 
+app.use("/api/auth", authRoutes); 
 app.use("/api/clients", clientRoutes);
 app.use("/api/products", productRoutes);
 app.use("/api/sales", salesRoutes);
