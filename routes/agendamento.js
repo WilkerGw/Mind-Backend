@@ -9,11 +9,13 @@ const {
   deleteAgendamento,
   getTotalAgendamentos,
   getAgendamentosHistory,
+  getTodaysAgendamentos, 
 } = require("../controllers/agendamento");
 
 router.get("/", getAllAgendamentos);
 router.get("/total", getTotalAgendamentos);
 router.get("/history", getAgendamentosHistory);
+router.get("/today", getTodaysAgendamentos); 
 router.get("/:id", getAgendamentoById);
 router.post("/", createAgendamento);
 router.put("/:id", updateAgendamento);

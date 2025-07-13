@@ -1,3 +1,4 @@
+// backend/models/User.js
 
 const mongoose = require('mongoose');
 
@@ -9,7 +10,7 @@ const userSchema = new mongoose.Schema({
   email: {
     type: String,
     required: [true, 'O email é obrigatório.'],
-    unique: true, 
+    unique: true,
     match: [/.+\@.+\..+/, 'Por favor, insira um email válido.'],
   },
   password: {
@@ -17,7 +18,7 @@ const userSchema = new mongoose.Schema({
     required: [true, 'A senha é obrigatória.'],
   },
 }, {
-  timestamps: true, 
+  timestamps: true,
 });
 
 module.exports = mongoose.model('User', userSchema);

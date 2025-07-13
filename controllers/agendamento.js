@@ -65,3 +65,19 @@ exports.getAgendamentosHistory = asyncHandler(async (req, res) => {
   });
   res.status(200).json(history);
 });
+
+exports.getTodaysAgendamentos = asyncHandler(async (req, res) => {
+  const todayStart = new Date();
+  todayStart.setHours(0, 0, 0, 0); 
+
+  const todayEnd = new Date();
+  todayEnd.setHours(23, 59, 59, 999); 
+
+  const todaysAgendamentos = await Agendamento.find({
+    date: { $gte: todayStart, $lte: todayEnd }
+  }).sort({
+    hour: 1 
+  });
+
+  res.status(200).json(todaysAgendamentos);
+});
