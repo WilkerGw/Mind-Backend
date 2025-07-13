@@ -1,30 +1,28 @@
-const mongoose = require('mongoose'); // Importa a biblioteca Mongoose para interagir com o MongoDB
+const mongoose = require('mongoose');
 
-// Define o esquema para o modelo Boleto
 const boletoSchema = new mongoose.Schema({
   client: { 
-    type: mongoose.Schema.Types.ObjectId, // Tipo do campo é ObjectId, referenciando o modelo 'Client'
-    ref: 'Client', // Referência o modelo 'Client'
-    required: true // Campo é obrigatório
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Client',
+    required: true
   },
   parcelValue: { 
-    type: Number, // Tipo do campo é Number
-    required: true, // Campo é obrigatório
-    min: 0.01 // Valor mínimo positivo
+    type: Number,
+    required: true,
+    min: 0.01
   },
   dueDate: { 
-    type: Date, // Tipo do campo é Date
-    required: true // Campo é obrigatório
+    type: Date,
+    required: true
   },
   status: { 
-    type: String, // Tipo do campo é String
-    enum: ['pago', 'aberto', 'atrasado'], // O valor deve ser um desses valores específicos
-    default: 'aberto' // Status padrão é 'aberto'
+    type: String,
+    enum: ['pago', 'aberto', 'atrasado'],
+    default: 'aberto'
   },
   description: { 
-    type: String // Tipo do campo é String
+    type: String
   }
 });
 
-// Exporta o modelo Boleto baseado no esquema definido
 module.exports = mongoose.model('Boleto', boletoSchema);

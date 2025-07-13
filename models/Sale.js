@@ -27,7 +27,7 @@ const saleSchema = new mongoose.Schema({
   notes: String,
   total: { type: Number, required: true, min: 0 }
 }, {
-  timestamps: true // Adiciona createdAt e updatedAt automaticamente
+  timestamps: true
 });
 
 module.exports = mongoose.model('Sale', saleSchema);

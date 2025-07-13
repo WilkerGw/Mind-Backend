@@ -1,4 +1,4 @@
-const express = require('express');
+const express = require("express");
 const router = express.Router();
 
 const {
@@ -8,17 +8,17 @@ const {
   updateBoleto,
   deleteBoleto,
   getTotalBoletosValue,
-  getOverdueBoletos, // Adicionado
-  getDueSoonBoletos  // Adicionado
-} = require('../controllers/boletos');
+  getOverdueBoletos,
+  getDueSoonBoletos,
+} = require("../controllers/boletos");
 
-router.get('/', getAllBoletos);
-router.get('/total', getTotalBoletosValue);
-router.get('/overdue', getOverdueBoletos); // Nova rota
-router.get('/due-soon', getDueSoonBoletos); // Nova rota
-router.get('/:id', getBoletoById);
-router.post('/', createBoleto);
-router.put('/:id', updateBoleto);
-router.delete('/:id', deleteBoleto);
+router.get("/", getAllBoletos);
+router.get("/total", getTotalBoletosValue);
+router.get("/overdue", getOverdueBoletos);
+router.get("/due-soon", getDueSoonBoletos);
+router.get("/:id", getBoletoById);
+router.post("/", createBoleto);
+router.put("/:id", updateBoleto);
+router.delete("/:id", deleteBoleto);
 
 module.exports = router;

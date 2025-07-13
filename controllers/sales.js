@@ -3,8 +3,7 @@ const Sale = require('../models/Sale');
 const Client = require('../models/Client');
 const Product = require('../models/Product');
 
-// @desc    Listar todas as vendas
-// @route   GET /api/sales
+
 exports.getAllSales = asyncHandler(async (req, res) => {
   const sales = await Sale.find()
     .populate('client', 'fullName')
@@ -13,8 +12,7 @@ exports.getAllSales = asyncHandler(async (req, res) => {
   res.json(sales);
 });
 
-// @desc    Buscar venda por ID
-// @route   GET /api/sales/:id
+
 exports.getSaleById = asyncHandler(async (req, res) => {
   const sale = await Sale.findById(req.params.id)
     .populate('client', 'fullName')
@@ -26,8 +24,7 @@ exports.getSaleById = asyncHandler(async (req, res) => {
   res.json(sale);
 });
 
-// @desc    Criar nova venda
-// @route   POST /api/sales
+
 exports.createSale = asyncHandler(async (req, res) => {
   const { client, products, seller, paymentMethod, total } = req.body;
   if (!client || !products || !seller || !paymentMethod || total == null) {
@@ -39,8 +36,6 @@ exports.createSale = asyncHandler(async (req, res) => {
   res.status(201).json(sale);
 });
 
-// @desc    Atualizar venda
-// @route   PUT /api/sales/:id
 exports.updateSale = asyncHandler(async (req, res) => {
   const sale = await Sale.findById(req.params.id);
   if (!sale) {
@@ -53,8 +48,7 @@ exports.updateSale = asyncHandler(async (req, res) => {
   res.json(updatedSale);
 });
 
-// @desc    Excluir venda
-// @route   DELETE /api/sales/:id
+
 exports.deleteSale = asyncHandler(async (req, res) => {
   const sale = await Sale.findById(req.params.id);
   if (!sale) {
@@ -65,8 +59,7 @@ exports.deleteSale = asyncHandler(async (req, res) => {
   res.status(200).json({ message: "Venda excluída com sucesso." });
 });
 
-// @desc    Obter o faturamento total
-// @route   GET /api/sales/total
+
 exports.getTotalSales = asyncHandler(async (req, res) => {
   const totalAggregation = await Sale.aggregate([
     { $group: { _id: null, total: { $sum: "$total" } } }
@@ -75,8 +68,7 @@ exports.getTotalSales = asyncHandler(async (req, res) => {
   res.json({ total });
 });
 
-// @desc    Obter histórico de vendas para gráfico
-// @route   GET /api/sales/history
+
 exports.getSalesHistory = asyncHandler(async (req, res) => {
   const sales = await Sale.aggregate([
     {
@@ -94,8 +86,6 @@ exports.getSalesHistory = asyncHandler(async (req, res) => {
   res.json(formattedData);
 });
 
-// @desc    Obter vendas do dia
-// @route   GET /api/sales/daily
 exports.getDailySales = asyncHandler(async (req, res) => {
   const todayStart = new Date();
   todayStart.setHours(0, 0, 0, 0);
@@ -111,8 +101,6 @@ exports.getDailySales = asyncHandler(async (req, res) => {
   res.json({ dailyTotal: total });
 });
 
-// @desc    Obter vendas do mês
-// @route   GET /api/sales/monthly
 exports.getMonthlySales = asyncHandler(async (req, res) => {
     const now = new Date();
     const firstDayOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);

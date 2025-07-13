@@ -35,7 +35,7 @@ const clientSchema = new mongoose.Schema({
     type: Boolean, 
     default: false 
   },
-  longe: { // Novo campo para informações de LONGE
+  longe: {
     esfericoDireito: { 
       type: String 
     },
@@ -58,7 +58,7 @@ const clientSchema = new mongoose.Schema({
       type: String 
     }
   },
-  perto: { // Novo campo para informações de PERTO
+  perto: {
     esfericoDireito: { 
       type: String 
     },

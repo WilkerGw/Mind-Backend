@@ -1,15 +1,12 @@
 const asyncHandler = require('express-async-handler');
 const Client = require('../models/Client');
 
-// @desc    Listar todos os clientes
-// @route   GET /api/clients
+
 exports.getAllClients = asyncHandler(async (req, res) => {
   const clients = await Client.find().sort({ fullName: 1 });
   res.json(clients);
 });
 
-// @desc    Buscar cliente por ID
-// @route   GET /api/clients/:id
 exports.getClientById = asyncHandler(async (req, res) => {
   const client = await Client.findById(req.params.id);
   if (!client) {
@@ -19,8 +16,6 @@ exports.getClientById = asyncHandler(async (req, res) => {
   res.json(client);
 });
 
-// @desc    Criar novo cliente
-// @route   POST /api/clients
 exports.createClient = asyncHandler(async (req, res) => {
   const { fullName, cpf, possuiReceita, longe, perto, vencimentoReceita } = req.body;
 
@@ -36,7 +31,7 @@ exports.createClient = asyncHandler(async (req, res) => {
 
   const existingClient = await Client.findOne({ cpf });
   if (existingClient) {
-    res.status(409); // Conflict
+    res.status(409); 
     throw new Error('CPF já cadastrado.');
   }
   
@@ -51,8 +46,6 @@ exports.createClient = asyncHandler(async (req, res) => {
   res.status(201).json(client);
 });
 
-// @desc    Atualizar cliente
-// @route   PUT /api/clients/:id
 exports.updateClient = asyncHandler(async (req, res) => {
   const { id } = req.params;
   const updateData = req.body;
@@ -81,8 +74,7 @@ exports.updateClient = asyncHandler(async (req, res) => {
   res.json(updatedClient);
 });
 
-// @desc    Excluir cliente
-// @route   DELETE /api/clients/:id
+
 exports.deleteClient = asyncHandler(async (req, res) => {
   const client = await Client.findById(req.params.id);
   if (!client) {
@@ -93,8 +85,7 @@ exports.deleteClient = asyncHandler(async (req, res) => {
   res.status(200).json({ message: 'Cliente excluído com sucesso.' });
 });
 
-// @desc    Obter aniversariantes do mês
-// @route   GET /api/clients/birthday/monthly
+
 exports.getClientsWithBirthdayThisMonth = asyncHandler(async (req, res) => {
   const currentMonth = new Date().getMonth() + 1;
   const clients = await Client.find({

@@ -1,7 +1,6 @@
 const asyncHandler = require('express-async-handler');
 const Boleto = require('../models/Boleto');
 
-// @desc    Listar todos os boletos (com lógica de status dinâmico)
 exports.getAllBoletos = asyncHandler(async (req, res) => {
   const boletosFromDB = await Boleto.find().populate('client', 'fullName').sort({ dueDate: 1 });
 
@@ -22,7 +21,6 @@ exports.getAllBoletos = asyncHandler(async (req, res) => {
   res.json(boletosComStatusAtualizado);
 });
 
-// @desc    Listar boletos vencidos e em aberto
 exports.getOverdueBoletos = asyncHandler(async (req, res) => {
   const hoje = new Date();
   hoje.setHours(0, 0, 0, 0);
@@ -35,7 +33,6 @@ exports.getOverdueBoletos = asyncHandler(async (req, res) => {
   res.json(boletosVencidos);
 });
 
-// @desc    Listar boletos que vencem nos próximos 7 dias
 exports.getDueSoonBoletos = asyncHandler(async (req, res) => {
   const hoje = new Date();
   hoje.setHours(0, 0, 0, 0);
@@ -54,7 +51,6 @@ exports.getDueSoonBoletos = asyncHandler(async (req, res) => {
   res.json(boletosAVencer);
 });
 
-// @desc    Buscar boleto por ID
 exports.getBoletoById = asyncHandler(async (req, res) => {
   const boleto = await Boleto.findById(req.params.id).populate('client', 'fullName');
   if (!boleto) {
@@ -64,7 +60,6 @@ exports.getBoletoById = asyncHandler(async (req, res) => {
   res.json(boleto);
 });
 
-// @desc    Criar novo(s) boleto(s)
 exports.createBoleto = asyncHandler(async (req, res) => {
   const data = req.body;
   if (Array.isArray(data)) {
@@ -83,7 +78,6 @@ exports.createBoleto = asyncHandler(async (req, res) => {
   }
 });
 
-// @desc    Atualizar boleto
 exports.updateBoleto = asyncHandler(async (req, res) => {
   const boleto = await Boleto.findById(req.params.id);
   if (!boleto) {
@@ -93,7 +87,7 @@ exports.updateBoleto = asyncHandler(async (req, res) => {
   res.json(updatedBoleto);
 });
 
-// @desc    Excluir boleto
+
 exports.deleteBoleto = asyncHandler(async (req, res) => {
   const boleto = await Boleto.findById(req.params.id);
   if (!boleto) {
@@ -103,7 +97,6 @@ exports.deleteBoleto = asyncHandler(async (req, res) => {
   res.status(200).json({ message: "Boleto excluído com sucesso." });
 });
 
-// @desc    Obter o valor total dos boletos
 exports.getTotalBoletosValue = asyncHandler(async (req, res) => {
     const totalAggregation = await Boleto.aggregate([
       { $match: { status: { $in: ['aberto', 'atrasado'] } } },

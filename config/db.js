@@ -1,16 +1,15 @@
-const mongoose = require('mongoose'); // Importa a biblioteca Mongoose para interagir com o MongoDB
-
-const connectDB = async () => { // Define uma função assíncrona chamada connectDB
+const mongoose = require("mongoose");
+const connectDB = async () => {
   try {
-    await mongoose.connect(process.env.MONGO_URI, { // Tenta se conectar ao banco de dados MongoDB usando a URI fornecida nas variáveis de ambiente
-      useNewUrlParser: true, // Usa o novo parser de URL do MongoDB
-      useUnifiedTopology: true, // Usa o novo gerenciador de topologia do MongoDB
+    await mongoose.connect(process.env.MONGO_URI, {
+      useNewUrlParser: true,
+      useUnifiedTopology: true,
     });
-    console.log('Conectado ao MongoDB'); // Se a conexão for bem-sucedida, exibe uma mensagem no console
+    console.log("Conectado ao MongoDB");
   } catch (error) {
-    console.error('Erro ao conectar ao MongoDB:', error.message); // Se ocorrer um erro durante a conexão, exibe uma mensagem de erro no console
-    process.exit(1); // Encerra o processo com código de status 1, indicando que houve um erro
+    console.error("Erro ao conectar ao MongoDB:", error.message);
+    process.exit(1);
   }
 };
 
-module.exports = connectDB; // Exporta a função connectDB para que possa ser usada em outros arquivos
+module.exports = connectDB;

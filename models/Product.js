@@ -10,7 +10,7 @@ const productSchema = new mongoose.Schema({
   material: { type: String, enum: ['Acetato', 'TR-90', 'Metal', 'TR-90+METAL', 'ACETATO+METAL'], required: true },
   stock: { type: Number, min: 0, required: true },
 }, {
-  timestamps: true // Adiciona createdAt e updatedAt automaticamente
+  timestamps: true
 });
 
 module.exports = mongoose.model('Product', productSchema);
